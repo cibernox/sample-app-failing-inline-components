@@ -1,16 +1,18 @@
-import "@testing-library/jest-dom/extend-expect";
 import { render, fireEvent } from '@testing-library/svelte'
-import Counter from './Counter.svelte';
+import svelte from 'svelte-inline-component';
 
 describe('Counter.svelte', () => {
   test('can increment/decrement the counter value', async () => {
-    const { getByTestId } = render(Counter);
-    expect(getByTestId('counter-value')).toHaveTextContent('0');
+    const { getByTestId } = render(await svelte`
+      <script>import Counter from '$lib/Counter.svelte';</script>
+      <Counter/>
+    `);
+    expect(getByTestId('counter-value')).to.contain.text('0');
 
     await fireEvent.click(getByTestId('increment-button'));  
-    expect(getByTestId('counter-value')).toHaveTextContent('1');
+    expect(getByTestId('counter-value')).to.contain.text('1');
 
     await fireEvent.click(getByTestId('decrement-button'));  
-    expect(getByTestId('counter-value')).toHaveTextContent('0');
+    expect(getByTestId('counter-value')).to.contain.text('0');
   });
 });

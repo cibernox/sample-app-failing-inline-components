@@ -1,0 +1,94 @@
+## Install Vitest and chai-dom
+
+`npm install -D vitest chai-dom`
+
+## Create a vitest.config.js file
+```
+import { defineConfig } from 'vite'
+import { svelte } from '@sveltejs/vite-plugin-svelte'
+
+export default defineConfig({
+  plugins: [
+    svelte({ hot: !process.env.VITEST, }),
+  ],
+  test: {
+    global: true,
+    environment: 'jsdom',
+  },
+});
+```
+
+## Change the test scripts in package.json
+```
+"test": "vitest run",
+"watch": "vitest watch"
+```
+
+## Delete everything jest
+Delete .babelrc
+Delete jest entries from package.json
+Uninstall `jest`, `babel-jest`, `svelte-jester` and `@babel/preset-env`
+Remove line in our test that imported jest-dom
+
+## Run tests
+Run tests: =============> ❌ Red!
+
+It fails. We have to change our assertions from jest-dom to chai-dom.
+Add 
+```
+import chai from 'chai';
+import chaiDom from 'chai-dom';
+chai.use(chaiDom);
+```
+and replace `toHaveTextContent` with `to.contain.text`.
+
+Run tests: =============> ✅ Green!
+
+## Putting these lines on every file is very repetivive, so we can do better.
+Create `test-setup.js` containing
+```
+import chai from 'chai';
+import chaiDom from 'chai-dom';
+chai.use(chaiDom);
+```
+Run tests: =============> ✅ Green!
+
+## But this api still has flaws. Let's assume you want to test a component with a slot
+You basically can't. There's no good way of testing slots with the current API.
+That's why at DockYard we have developed `svelte-inline-component`. It's a vite/vitest plugin 
+that allows you to write components the same way you do in your app.
+
+## Install `svelte-inline-components`
+`npm install -D svelte-inline-component`
+ 
+# Then we add the vite plugin to the vitest.config.js
+
+```diff
+import { defineConfig } from 'vite'
+import { svelte } from '@sveltejs/vite-plugin-svelte'
++import svelteInlineComponent from 'vite-plugin-svelte-inline-component';
+
+export default defineConfig({
+  plugins: [
+    svelte({ hot: !process.env.VITEST, }),
++    svelteInlineComponent()
+  ],
+  test: {
+    global: true,
+    environment: 'jsdom',
+    setupFiles: ['./test-setup.js']
+  },
+});
+```
+
+And then in our test we import the `svelte` helper from `svelte-inline-component`
+
+```js
+    import svelte from 'svelte-inline-components';
+
+    // ...
+    const { getByTestId } = render(await svelte`
+      <script>import Counter from '$lib/Counter.svelte';</svelte>
+      <Counter>
+    `);
+```
