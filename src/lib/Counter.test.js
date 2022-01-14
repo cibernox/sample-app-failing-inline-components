@@ -7,16 +7,10 @@ describe('Counter.svelte', () => {
     const { getByTestId } = render(Counter);
     expect(getByTestId('counter-value')).toHaveTextContent('0');
 
-    await fireEvent(
-      getByTestId('increment-button'),
-      new MouseEvent('click', { bubbles: true, cancelable: true }),
-    );  
+    await fireEvent.click(getByTestId('increment-button'));  
     expect(getByTestId('counter-value')).toHaveTextContent('1');
 
-    await fireEvent(
-      getByTestId('decrement-button'),
-      new MouseEvent('click', { bubbles: true, cancelable: true }),
-    );  
+    await fireEvent.click(getByTestId('decrement-button'));  
     expect(getByTestId('counter-value')).toHaveTextContent('0');
   });
 });
